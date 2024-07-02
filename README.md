@@ -1,6 +1,6 @@
 Directions:
 
-1. Download Python 3.10.7  (64bit)  if that's what you PC takes.    Link: https://www.python.org/downloads/release/python-3107/
+1. Download Python 3.10.7 (64bit) or (32bit) whichever your PC takes.    Link: https://www.python.org/downloads/release/python-3107/
 2. Download Pycharm from Google
 3. Download my code in a zip file, now Extract the file using Winrar(If you don't have it just downloaded from Google)
 4. Then move the Extracted files to Pycharm's projects file in C:/Users/Dell/PycharmProjects      (Obviously, if it's a different computer than not Dell)
