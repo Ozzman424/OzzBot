@@ -10,6 +10,7 @@ from login_details import email, password
 class TinderBot():
     def __init__(self):
         self.driver = webdriver.Chrome()
+        self.swiping = True
         self.url_monitor_thread = Thread(target=self.monitor_url)
         self.url_monitor_thread.daemon = True
         self.url_monitor_thread.start()
@@ -18,7 +19,7 @@ class TinderBot():
         self.driver.get('https://tinder.com')
         sleep(2)
         login = self.driver.find_element('xpath',
-                                         '/html/body/div[1]/div/div[1]/div/main/div[1]/div/div/div/div/header/div/div[2]/div[2]/a/div[2]/div[2]/div')
+                                         '/html/body/div[1]/div/div[1]/div/main/div[1]/div/div/div/div/div/header/div/div[2]/div[2]/a/div[2]/div[2]')
         login.click()
         sleep(1)
         self.facebook_login()
@@ -63,7 +64,7 @@ class TinderBot():
 
     def close_match(self):
         try:
-            match_popup = self.driver.find_element('xpath', '//*[@id="modal-manager-canvas"]//a')
+            match_popup = self.driver.find_element('xpath', '/html/body/div[1]/div/div[1]/div/main/div[2]/div/div/div[1]/div/div[4]/button')
             match_popup.click()
         except:
             print('No match popup')
@@ -78,33 +79,37 @@ class TinderBot():
 
     def monitor_url(self):
         while True:
-            current_url = self.driver.current_url
-            start_time = time()
-            while time() - start_time < 10:
-                sleep(1)
-                if self.driver.current_url != current_url:
-                    break
+            if self.swiping:
+                current_url = self.driver.current_url
+                start_time = time()
+                while time() - start_time < 5:
+                    sleep(1)
+                    if self.driver.current_url != current_url:
+                        break
+                else:
+                    if self.driver.current_url == 'https://tinder.com/app/recs':
+                        print("Reloading page due to being on recs page for 4 seconds")
+                        self.driver.refresh()
+                        continue
+                    elif self.driver.current_url == 'https://tinder.com/app/recs/profile':
+                        print("Profile page detected, stopping reload process")
+                        while self.driver.current_url == 'https://tinder.com/app/recs/profile':
+                            sleep(1)
             else:
-                if self.driver.current_url == 'https://tinder.com/app/recs':
-                    print("Reloading page due to being on recs page for 10 seconds")
-                    self.driver.refresh()
-                    continue
-                elif self.driver.current_url == 'https://tinder.com/app/recs/profile':
-                    print("Profile page detected, stopping reload process")
-                    while self.driver.current_url == 'https://tinder.com/app/recs/profile':
-                        sleep(1)
+                sleep(1)
 
     def auto_swipe(self):
-        keywords = ["insta", "gramm", "@", "inzztagrm", "Inzztagrm", "i n t s a", "snap", "igggg", "iggg", "igg",
-                    "smapp", "snepchat", "i n t s a", "s :", "ixnsta", "gram", "mys:", "s ;"]
+        keywords = ["insta", "intsa", "gramm", "@", "inzztagrm", "inzztagrm-", "i n t s a", "i n s t a", "i,n,s,t,a", "i,n,t,s,a", "i.n.t.s.a", "snap", "igggg", "iggg", "igg",
+                    "smapp", "snepchat", "i n t s a", "s :", "ixnsta", "gram", "mys:", "s ;", "snapchat"]
         keywords = [re.escape(keyword.lower()) for keyword in
                     keywords]  # Escape special characters and convert to lowercase
         keyword_pattern = re.compile('|'.join(keywords))  # Create a regex pattern
 
         while True:
-            swipe_duration = randint(15, 30) * 60  # Random swipe duration between 15 to 30 minutes
-            break_duration = randint(15, 30) * 60  # Random break duration between 15 to 30 minutes
+            swipe_duration = randint(30, 40) * 60  # Random swipe duration between 15 to 30 minutes
+            break_duration = randint(15, 20) * 60  # Random break duration between 15 to 30 minutes
 
+            self.swiping = True
             start_time = time()
             while time() - start_time < swipe_duration:
                 sleep(randint(1, 3))  # Random delay between each swipe to simulate human behavior
@@ -126,7 +131,7 @@ class TinderBot():
                     # Check the additional info section for keywords
                     try:
                         additional_info_element = self.driver.find_element('xpath',
-                                                                           '//div[contains(@class, "Us(t)") and contains(@class, "Va(m)") and contains(@class, "D(ib)") and contains(@class, "NetWidth(100%,20px)") and contains(@class, "C($c-ds-text-secondary)")]')
+                                                                           '/html/body/div[1]/div/div[1]/div/main/div[1]/div/div/div[1]/div[1]/div/div[2]/div[1]/div/div[2]/div[1]/div[2]')
                         additional_info_text = additional_info_element.text.lower()  # Convert additional info text to lowercase
                     except:
                         additional_info_text = ""
@@ -142,6 +147,7 @@ class TinderBot():
                     self.close_match()
 
             print("Taking a break...")
+            self.swiping = False
             sleep(break_duration)
 
     def get_matches(self):
@@ -170,9 +176,3 @@ bot.open_tinder()
 sleep(10)
 bot.auto_swipe()
 bot.send_messages_to_matches()
-
-#def reload_page(self):
-#    while True:
-#        sleep_duration = uniform(3, 5) * 60  # Random sleep duration between 3 to 5 minutes
-#        sleep(sleep_duration)
-#        self.driver.refresh()
